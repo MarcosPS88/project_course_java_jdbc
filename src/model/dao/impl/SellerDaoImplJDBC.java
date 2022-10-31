@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,13 +29,108 @@ public class SellerDaoImplJDBC implements SellerDao {
 	
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+		
+		PreparedStatement st = null;
+		
+		String sql = "INSERT INTO seller (Name, Email, BirthDate, BaseSalary, DepartmentId) "
+				+ "Values(?,?,?,?,?) ";
+		
+		try {
+			conn.setAutoCommit(false);
+			st = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			
+			int rowsAffected = st.executeUpdate();
+			
+			if(rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				if(rs.next()) {
+					int id = rs.getInt(1);
+					
+					obj.setId(id);
+					
+					DB.closeResultSet(rs);
+					
+				}else {
+					throw new DbException("Unexpected error! No rows affected!");
+				}
+				
+			}
+
+			System.out.println("Rows Affected: " + rowsAffected);
+			
+			conn.commit();
+		} catch (SQLException e) {
+			
+			try {
+				
+				conn.rollback();
+				
+			} catch (SQLException e1) {
+				
+				throw new DbException("Insert Erro: " + e.getMessage());
+			}
+			
+			throw new DbException("Insert Erro: " + e.getMessage());
+			
+		}finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+			
+		}
+		
 		
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement st = null;
+		
+		String sql = "UPDATE seller (Name, Email, BithDate, BaseSalary, DepartmentId) "
+				+ "Values(?,?,?,?,?)";
+		
+		try {
+			conn.setAutoCommit(false);
+			st = conn.prepareStatement(sql);
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			
+			
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getDate()));
+			
+			st.setDouble(4, obj.getBaseSalary());
+			st.setObject(5, obj.getDepartment());
+			
+			int rowsAffected = st.executeUpdate();
+
+			System.out.println("Rows Affected: " + rowsAffected);
+			
+			conn.commit();
+		} catch (SQLException e) {
+			
+			try {
+				
+				conn.rollback();
+				
+			} catch (SQLException e1) {
+				
+				throw new DbException("Insert Erro: " + e.getMessage());
+			}
+			
+			throw new DbException("Insert Erro: " + e.getMessage());
+			
+		}finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+			
+		}
 		
 	}
 
