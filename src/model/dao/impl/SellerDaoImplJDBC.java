@@ -80,7 +80,6 @@ public class SellerDaoImplJDBC implements SellerDao {
 			
 		}finally {
 			DB.closeStatement(st);
-			DB.closeConnection();
 			
 		}
 		
@@ -125,7 +124,6 @@ public class SellerDaoImplJDBC implements SellerDao {
 			
 		}finally {
 			DB.closeStatement(st);
-			DB.closeConnection();
 			
 		}
 		
@@ -133,7 +131,39 @@ public class SellerDaoImplJDBC implements SellerDao {
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		
+		String sql = "DELETE FROM seller WHERE Id = ?";
+		PreparedStatement st = null;
+		
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			st = conn.prepareStatement(sql);
+			
+			st.setInt(1, id);
+			
+			int rows = st.executeUpdate();
+			
+			conn.commit();
+			
+			if(rows == 0) {
+				throw new DbException("Invalid Id!");
+			}
+			
+			
+		} catch (SQLException e) {
+			
+			throw new DbException("Error: " + e.getMessage());
+			
+		}finally {
+			
+			DB.closeStatement(st);
+			
+		}
+		
+		
+		
 		
 	}
 
@@ -173,6 +203,7 @@ public class SellerDaoImplJDBC implements SellerDao {
 			
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
+			
 		}
 		
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import db.DB;
 import model.dao.DaoFactory;
 import model.dao.SellerDao;
 import model.entities.Department;
@@ -36,19 +37,27 @@ public class Program {
 		}
 		
 		System.out.println("===TEST 4: seller insert ===");
-//		Seller newseller = new Seller(null, "Greg", "greg@gmail.com", new Date(), 4000.0, dep );
-//		
-//		sellerDao.insert(newseller);
-//		System.out.println("Inserted! New Id = " + newseller.getId());
+		Seller newseller = new Seller(null, "Greg", "greg@gmail.com", new Date(), 4000.0, dep );
+		
+		sellerDao.insert(newseller);
+		System.out.println("Inserted! New Id = " + newseller.getId());
 		
 		System.out.println("===TEST 5: seller update ===");
-		seller = sellerDao.findById(2);
+		seller = sellerDao.findById(1);
 		
-		seller.setName("Martha Waine");
+		seller.setName("Martha Taste");
 		
 		sellerDao.update(seller);
 		
 		System.out.println("Update Completed!");
+		
+		System.out.println("===TEST 6: seller delete ===");
+		sellerDao.deleteById(16);
+		System.out.println("Done!!!");
+		
+		
+		
+		DB.closeConnection();
 		
 	}
 
