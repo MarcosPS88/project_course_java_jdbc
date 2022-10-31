@@ -87,13 +87,12 @@ public class SellerDaoImplJDBC implements SellerDao {
 		
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public void update(Seller obj) {
 		PreparedStatement st = null;
 		
-		String sql = "UPDATE seller (Name, Email, BithDate, BaseSalary, DepartmentId) "
-				+ "Values(?,?,?,?,?)";
+		String sql = "UPDATE seller SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+				+ "WHERE Id = ?";
 		
 		try {
 			conn.setAutoCommit(false);
@@ -101,15 +100,13 @@ public class SellerDaoImplJDBC implements SellerDao {
 			
 			st.setString(1, obj.getName());
 			st.setString(2, obj.getEmail());
-			
-			
-			st.setDate(3, new java.sql.Date(obj.getBirthDate().getDate()));
-			
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
 			st.setDouble(4, obj.getBaseSalary());
-			st.setObject(5, obj.getDepartment());
+			st.setInt(5, obj.getDepartment().getId());
+			st.setInt(6, obj.getId());
 			
 			int rowsAffected = st.executeUpdate();
-
+			
 			System.out.println("Rows Affected: " + rowsAffected);
 			
 			conn.commit();
