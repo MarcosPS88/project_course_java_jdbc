@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 import db.DB;
@@ -23,30 +25,113 @@ public class DepartmentDaoImplJDBC implements DepartmentDao {
 
 	@Override
 	public void insert(Department obj) {
-		// TODO Auto-generated method stub
+		
+		String sql = "INSERT INTO department (Name) Values (?)";
+		
+		PreparedStatement st = null;
+		
+		try {
+			conn.setAutoCommit(false);
+			st = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+			st.setString(1, obj.getName());
+			
+			int rows = st.executeUpdate();
+			conn.commit();
+			
+			if(rows > 0) {
+				
+				ResultSet rs = st.getGeneratedKeys();
+				if(rs.next()) {
+					obj.setId(rs.getInt(1));
+				}
+				
+				DB.closeResultSet(rs);
+				System.out.println("Rows Affected: " + rows );
+				System.out.println("Addeded Id: " + obj.getId() );
+				
+				
+			}
+			
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+			throw new DbException("Error : " + e.getMessage());
+			
+		}finally {
+			DB.closeStatement(st);
+		}
 		
 	}
 
 	@Override
 	public void update(Department obj) {
-		// TODO Auto-generated method stub
+		String sql = "UPDATE department SET Name = ? WHERE Id = ?";
+		
+		PreparedStatement st = null;
+		
+		try {
+			conn.setAutoCommit(false);
+			st = conn.prepareStatement(sql);
+			st.setString(1, obj.getName());
+			st.setInt(2, obj.getId());
+			
+			int rows = st.executeUpdate();
+			conn.commit();
+			
+				System.out.println("Rows Affected: " + rows );
+				System.out.println("Data updated: " + obj );
+				
+		} catch (SQLException e) {
+			
+			e.printStackTrace();
+			throw new DbException("Error : " + e.getMessage());
+			
+		}finally {
+			DB.closeStatement(st);
+		}
 		
 	}
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		String sql = "DELETE FROM department WHERE Id = ?";
+		PreparedStatement st = null;
+		
+		try {
+			
+			conn.setAutoCommit(false);
+			
+			st = conn.prepareStatement(sql);
+			
+			st.setInt(1, id);
+			
+			int rows = st.executeUpdate();
+			
+			conn.commit();
+
+			System.out.println("Data deleted!");
+			
+			if(rows == 0) {
+				throw new DbException("Invalid Id!");
+			}
+			
+			
+		} catch (SQLException e) {
+			
+			throw new DbException("Error: " + e.getMessage());
+			
+		}finally {
+			
+			DB.closeStatement(st);
+			
+		}
 		
 	}
 
 	@Override
 	public Department findById(Integer id) {
 		
-		String sql = "SELECT seller.*,department.Name as DepName "
-				+ "FROM seller INNER JOIN department "
-				+ "ON seller.DepartmentId = department.Id "
-				+ "WHERE DepartmentId = ? "
-				+ "ORDER BY Name ";
+		String sql = "SELECT * FROM department WHERE Id = ?";
 		
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -90,8 +175,36 @@ public class DepartmentDaoImplJDBC implements DepartmentDao {
 
 	@Override
 	public List<Department> findAll() {
-		// TODO Auto-generated method stub
-		return null;
+		String sql = "SELECT * FROM department";
+		
+		
+		List<Department> listDep = new ArrayList<>();
+		
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			
+			st = conn.prepareStatement(sql);
+			rs = st.executeQuery();
+			
+			while(rs.next()) {
+								
+				Department dep = instantiateDepartment(rs); 				
+				
+				listDep.add(dep);
+				
+			}
+			return listDep;
+		} catch (SQLException e) {
+
+			throw new DbException(e.getMessage());
+			
+		}finally {
+			
+			DB.closeStatement(st);
+			DB.closeResultSet(rs);
+			
+		}
 	}
 
 }
